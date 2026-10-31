@@ -8,11 +8,13 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
-  category: string;
+  category?: string;
+  projectId?: string;
   dueDate?: string;
   createdAt: string;
   updatedAt?: string;
 }
-
 export type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>;
 export type UpdateTaskInput = Partial<CreateTaskInput>;
+
+

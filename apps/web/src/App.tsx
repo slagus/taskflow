@@ -1,5 +1,7 @@
+/*
 import React, { useState } from 'react';
 import { useTaskManagement } from './hooks/useTaskManagement';
+import { useTheme } from './hooks/useTheme';
 import { Sidebar } from './components/Sidebar';
 import type { ActiveScreen } from './components/Sidebar';
 import { Navbar } from './components/Navbar';
@@ -8,6 +10,9 @@ import { ProjectsView } from './screens/ProjectsView';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState<ActiveScreen>('dashboard');
+  const [projectFilter, setProjectFilter] = useState<string>('');
+  
+  const { theme, toggleTheme } = useTheme();
   
   const {
     tasks,
@@ -23,11 +28,19 @@ export default function App() {
   } = useTaskManagement();
 
   return (
-    <div className="flex h-screen bg-slate-950 text-slate-100 font-sans antialiased overflow-hidden">
-      <Sidebar currentScreen={currentScreen} onSelectScreen={setCurrentScreen} />
+    <div className="flex h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased overflow-hidden transition-colors">
+      <Sidebar currentScreen={currentScreen} onSelectScreen={(screen) => {
+        setCurrentScreen(screen);
+        if (screen !== 'dashboard') setProjectFilter(''); // clear filter when leaving dashboard
+      }} />
 
       <main className="flex-1 flex flex-col overflow-y-auto">
-        <Navbar searchQuery={searchQuery} onSearchChange={setSearchQuery} />
+        <Navbar 
+          searchQuery={searchQuery} 
+          onSearchChange={setSearchQuery} 
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
 
         <div className="p-8 max-w-6xl mx-auto w-full">
           {currentScreen === 'dashboard' || currentScreen === 'tasks' ? (
@@ -40,12 +53,32 @@ export default function App() {
               onCreateTask={createTask}
               onToggleTask={toggleTaskStatus}
               onDeleteTask={deleteTask}
+              selectedCategoryFilter={projectFilter}
+              onClearCategoryFilter={() => setProjectFilter('')}
             />
           ) : currentScreen === 'projects' ? (
-            <ProjectsView />
+            <ProjectsView 
+              tasks={tasks}
+              onSelectProjectFilter={(categoryName) => setProjectFilter(categoryName)}
+              onNavigateScreen={setCurrentScreen}
+            />
           ) : null}
         </div>
       </main>
     </div>
+  );
+}
+
+*/
+
+import React from 'react';
+import { BrowserRouter } from 'react-router-dom';
+import { AppRoutes } from './routes';
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
