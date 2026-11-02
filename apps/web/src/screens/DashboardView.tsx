@@ -1,21 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ListTodo, Clock, CheckCircle2 } from 'lucide-react';
 import { useTaskManagement } from '../hooks/useTaskManagement';
+import { applyQuickFilter, type QuickFilterType } from '@taskflow/services';
+import { TaskAnalyticsCharts } from '../components/TaskAnalyticsCharts';
+import { TaskVelocityChart } from '../components/TaskVelocityChart';
+import { AiTaskAdvisor } from '../components/AiTaskAdvisor';
+import { QuickFilterChips } from '../components/QuickFilterChips';
+import { PomodoroFocusTimer } from '../components/PomodoroFocusTimer';
+import { ActivityStreamWidget } from '../components/ActivityStreamWidget';
+import { MetricCard } from '../components/MetricCard';
 import { TaskForm } from '../components/TaskForm';
 import { TaskItem } from '../components/TaskItem';
-import { MetricCard } from '../components/MetricCard';
-import { CheckSquare, ListTodo, Clock, CheckCircle2, Search } from 'lucide-react';
-import type { Task } from '@taskflow/types';
 
-interface DashboardViewProps {
-  selectedCategoryFilter?: string;
-  onClearCategoryFilter?: () => void;
-}
-
-export function DashboardView({ selectedCategoryFilter, onClearCategoryFilter }: DashboardViewProps) {
-  // Encapsulate hook connection directly inside the dashboard
+export function DashboardView() {
   const {
     tasks,
-    loading,
     filter,
     setFilter,
     searchQuery,
@@ -24,101 +23,129 @@ export function DashboardView({ selectedCategoryFilter, onClearCategoryFilter }:
     createTask,
     toggleTaskStatus,
     deleteTask,
+    getFilteredTasks,
   } = useTaskManagement();
 
-  // Filter tasks if a project/category filter is active from the Projects screen
-  const displayedTasks = selectedCategoryFilter 
-    ? tasks.filter(t => t.category === selectedCategoryFilter || t.projectId === selectedCategoryFilter)
-    : tasks;
+  const [quickFilter, setQuickFilter] = useState<QuickFilterType>('all');
+
+  // Apply quick filter on top of status/search filtering
+  const baseFiltered = getFilteredTasks();
+  const displayedTasks = applyQuickFilter(baseFiltered, quickFilter);
 
   return (
     <div className="space-y-6">
-      {/* Header & Optional Project Filter Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-            {selectedCategoryFilter ? `Project: ${selectedCategoryFilter}` : 'Welcome back, Developer 👋'}
-          </h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-            {selectedCategoryFilter 
-              ? `Showing tasks filtered for workspace "${selectedCategoryFilter}"`
-              : 'Here is your productivity overview and active task stream.'}
-          </p>
-        </div>
+      {/* Top Header & AI Advisor Banner */}
+      <div className="space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+              Dashboard Overview
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Welcome back! Here is your daily productivity summary and active task stream.
+            </p>
+          </div>
 
-        {selectedCategoryFilter && (
-          <button
-            onClick={onClearCategoryFilter}
-            className="self-start text-xs bg-indigo-50 dark:bg-indigo-600/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20 px-3 py-1.5 rounded-lg font-medium hover:bg-indigo-100 dark:hover:bg-indigo-600/20 transition"
-          >
-            Clear Filter ×
-          </button>
-        )}
-      </div>
-
-      {/* Metrics Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <MetricCard title="Total Tasks" value={metrics.total} icon={<ListTodo className="h-5 w-5 text-indigo-500" />} />
-        <MetricCard title="In Progress" value={metrics.inProgress} icon={<Clock className="h-5 w-5 text-cyan-500" />} />
-        <MetricCard title="Completed" value={metrics.completed} icon={<CheckCircle2 className="h-5 w-5 text-emerald-500" />} />
-      </div>
-
-      {/* Quick-Add Task Form */}
-      <TaskForm onSubmit={createTask} />
-
-      {/* Toolbar: Search & Filter Tabs */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-        {/* Local Search Input for Dashboard */}
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500" />
-          <input 
-            type="text" 
+          {/* Search Input */}
+          <input
+            type="text"
+            placeholder="Search tasks..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search tasks..." 
-            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg pl-9 pr-4 py-2 text-sm text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition"
+            className="px-3.5 py-2 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 transition w-full md:w-64"
           />
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors w-full sm:w-auto justify-end">
-          {(['all', 'todo', 'in_progress', 'completed'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium capitalize transition ${
-                filter === tab
-                  ? 'bg-indigo-600 text-white shadow'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-800/60'
-              }`}
-            >
-              {tab.replace('_', ' ')}
-            </button>
-          ))}
-        </div>
+        {/* 1. AI Task Advisor Widget */}
+        <AiTaskAdvisor tasks={tasks} />
       </div>
 
-      {/* Task List / Loading / Empty States */}
-      {loading ? (
-        <div className="text-center py-12 text-slate-500 dark:text-slate-400">Loading your workspace...</div>
-      ) : displayedTasks.length === 0 ? (
-        <div className="text-center py-16 bg-white dark:bg-slate-900/30 border border-slate-200 dark:border-slate-800/80 rounded-xl shadow-sm transition-colors">
-          <CheckSquare className="h-10 w-10 text-slate-400 dark:text-slate-600 mx-auto mb-3" />
-          <p className="text-slate-800 dark:text-slate-300 font-medium">No tasks found</p>
-          <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">Create one above to get started.</p>
+      {/* Top Metrics Cards Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <MetricCard
+          title="Total Tasks"
+          value={metrics.total}
+          icon={<ListTodo className="h-5 w-5 text-indigo-500" />}
+        />
+        <MetricCard
+          title="In Progress"
+          value={metrics.inProgress}
+          icon={<Clock className="h-5 w-5 text-cyan-500" />}
+        />
+        <MetricCard
+          title="Completed"
+          value={metrics.completed}
+          icon={<CheckCircle2 className="h-5 w-5 text-emerald-500" />}
+        />
+      </div>
+
+      {/* Analytics Charts Section */}
+      <div className="space-y-6">
+        <TaskAnalyticsCharts tasks={tasks} />
+        <TaskVelocityChart tasks={tasks} />
+      </div>
+
+      {/* Main Dashboard Grid: Task Stream (Left) & Sidebar Tools (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column: Quick Filter Chips, Creation Form & Task List */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 p-5 rounded-xl backdrop-blur space-y-4 shadow-sm transition-colors">
+            {/* Quick Filter Chips */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800/80">
+              <QuickFilterChips
+                activeQuickFilter={quickFilter}
+                onSelectFilter={setQuickFilter}
+              />
+
+              {/* Status Tab Filter */}
+              <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-950 p-1 rounded-lg">
+                {(['all', 'todo', 'in_progress', 'completed'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setFilter(tab)}
+                    className={`px-2.5 py-1 text-xs font-medium rounded-md transition capitalize ${
+                      filter === tab
+                        ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
+                        : 'text-slate-500 hover:text-slate-900 dark:hover:text-slate-300'
+                    }`}
+                  >
+                    {tab.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Add Form */}
+            <TaskForm onSubmit={createTask} />
+
+            {/* Task Item List Stream */}
+            <div className="space-y-2 pt-2">
+              {displayedTasks.length === 0 ? (
+                <div className="text-center py-12 border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    No tasks match your current filter criteria.
+                  </p>
+                </div>
+              ) : (
+                displayedTasks.map((task) => (
+                  <TaskItem
+                    key={task.id}
+                    task={task}
+                    onToggleStatus={toggleTaskStatus}
+                    onDelete={deleteTask}
+                  />
+                ))
+              )}
+            </div>
+          </div>
         </div>
-      ) : (
-        <div className="space-y-3">
-          {displayedTasks.map((task: Task) => (
-            <TaskItem 
-              key={task.id} 
-              task={task} 
-              onToggle={toggleTaskStatus} 
-              onDelete={deleteTask} 
-            />
-          ))}
+
+        {/* Right Column: Pomodoro Focus Timer & Activity Stream */}
+        <div className="space-y-6">
+          <PomodoroFocusTimer />
+          <ActivityStreamWidget />
         </div>
-      )}
+      </div>
     </div>
   );
 }

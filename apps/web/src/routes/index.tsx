@@ -4,6 +4,7 @@ import type { RouteObject } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
 import { DashboardView } from '../screens/DashboardView';
 import { ProjectsView } from '../screens/ProjectsView';
+import { SettingsView } from '../screens/SettingsView';
 
 export const routesConfig: RouteObject[] = [
   {
@@ -12,6 +13,7 @@ export const routesConfig: RouteObject[] = [
       { path: '/', element: <DashboardView /> },
       { path: '/tasks', element: <DashboardView /> },
       { path: '/projects', element: <ProjectsView /> },
+      { path: '/settings', element: <SettingsView /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

@@ -1,67 +1,50 @@
-import { useEffect, useState } from 'react';
-import { getTaskRepository } from '@taskflow/database';
-import type { ITaskRepository } from '@taskflow/database';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Task, CreateTaskInput, TaskStatus } from '@taskflow/types';
-
-export type TaskFilterTab = 'all' | 'todo' | 'in_progress' | 'completed';
+import { 
+  calculateMetrics, 
+  filterAndSearchTasks, 
+  createNewTaskEntity 
+} from '@taskflow/services';
+import { taskStorageService } from '../services/taskStorageService';
 
 export function useTaskManagement() {
-  const [repo, setRepo] = useState<ITaskRepository | null>(null);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<TaskFilterTab>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [tasks, setTasks] = useState<Task[]>(() => taskStorageService.getTasks());
+  const [filter, setFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
+  // Sync state changes to browser storage via app service
   useEffect(() => {
-    const taskRepo = getTaskRepository();
-    setRepo(taskRepo);
-    taskRepo.getTasks().then((data) => {
-      setTasks(data);
-      setLoading(false);
-    });
+    taskStorageService.saveTasks(tasks);
+  }, [tasks]);
+
+  // Compute metrics using shared package logic
+  const metrics = useMemo(() => calculateMetrics(tasks), [tasks]);
+
+  // CRUD Actions
+  const createTask = useCallback((input: CreateTaskInput) => {
+    const newTask = createNewTaskEntity(input);
+    setTasks((prev) => [newTask, ...prev]);
   }, []);
 
-  const createTask = async (input: CreateTaskInput) => {
-    if (!repo) return;
-    const created = await repo.createTask(input);
-    setTasks([created, ...tasks]);
-  };
+  const toggleTaskStatus = useCallback((task: Task) => {
+    const nextStatus: Record<TaskStatus, TaskStatus> = {
+      todo: 'in_progress',
+      in_progress: 'completed',
+      completed: 'todo',
+    };
 
-  const toggleTaskStatus = async (task: Task) => {
-    if (!repo) return;
-    const nextStatus: TaskStatus = 
-      task.status === 'todo' ? 'in_progress' : 
-      task.status === 'in_progress' ? 'completed' : 'todo';
+    setTasks((prev) =>
+      prev.map((t) => (t.id === task.id ? { ...t, status: nextStatus[t.status], updatedAt: new Date().toISOString() } : t))
+    );
+  }, []);
 
-    const updated = await repo.updateTask(task.id, { status: nextStatus });
-    setTasks(tasks.map((t) => (t.id === task.id ? updated : t)));
-  };
-
-  const deleteTask = async (id: string) => {
-    if (!repo) return;
-    await repo.deleteTask(id);
-    setTasks(tasks.filter((t) => t.id !== id));
-  };
-
-  // Filter and search logic
-  const filteredTasks = tasks.filter((t) => {
-    const matchesTab = filter === 'all' || t.status === filter;
-    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (t.description?.toLowerCase() ?? '').includes(searchQuery.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
-
-  // Metrics
-  const metrics = {
-    total: tasks.length,
-    completed: tasks.filter((t) => t.status === 'completed').length,
-    inProgress: tasks.filter((t) => t.status === 'in_progress').length,
-    urgent: tasks.filter((t) => t.priority === 'urgent' && t.status !== 'completed').length,
-  };
+  const deleteTask = useCallback((id: string) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  }, []);
 
   return {
-    tasks: filteredTasks,
-    allTasksCount: tasks.length,
+    tasks,
     loading,
     filter,
     setFilter,
@@ -71,5 +54,6 @@ export function useTaskManagement() {
     createTask,
     toggleTaskStatus,
     deleteTask,
+    getFilteredTasks: (projectFilter?: string) => filterAndSearchTasks(tasks, filter, searchQuery, projectFilter),
   };
 }

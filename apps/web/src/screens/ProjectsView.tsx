@@ -1,16 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Briefcase, FolderPlus, ListTodo, CheckCircle2, ArrowRight } from 'lucide-react';
-import type { Task } from '@taskflow/types';
-import type { ActiveScreen } from '../components/Sidebar';
+import { useTaskManagement } from '../hooks/useTaskManagement';
+import { useNavigate } from 'react-router-dom';
 
-interface ProjectsViewProps {
-  tasks: Task[];
-  onSelectProjectFilter: (categoryName: string) => void;
-  onNavigateScreen: (screen: ActiveScreen) => void;
-}
+export function ProjectsView() {
+  const { tasks } = useTaskManagement();
+  const navigate = useNavigate();
 
-export function ProjectsView({ tasks, onSelectProjectFilter, onNavigateScreen }: ProjectsViewProps) {
-  const projects = [
+  // Predefined or dynamic project workspaces
+  const [projects] = useState([
     {
       id: '1',
       name: 'Work & Career',
@@ -29,7 +27,12 @@ export function ProjectsView({ tasks, onSelectProjectFilter, onNavigateScreen }:
       description: 'Workout schedules, meal planning, and daily wellness tracking.',
       color: 'bg-emerald-500',
     },
-  ];
+  ]);
+
+  const handleSelectProject = (projectName: string) => {
+    // Navigate to dashboard with project filter state passed via router state or search params
+    navigate('/', { state: { selectedCategoryFilter: projectName } });
+  };
 
   return (
     <div className="space-y-6">
@@ -57,10 +60,7 @@ export function ProjectsView({ tasks, onSelectProjectFilter, onNavigateScreen }:
           return (
             <div 
               key={project.id} 
-              onClick={() => {
-                onSelectProjectFilter(project.name);
-                onNavigateScreen('dashboard');
-              }}
+              onClick={() => handleSelectProject(project.name)}
               className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 p-6 rounded-xl backdrop-blur space-y-4 hover:border-indigo-500/50 dark:hover:border-indigo-500/50 transition group cursor-pointer shadow-sm hover:shadow-indigo-500/10"
             >
               <div className="flex items-center justify-between">

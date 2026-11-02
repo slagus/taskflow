@@ -10,7 +10,7 @@ interface NavbarProps {
 
 export function Navbar({ searchQuery, onSearchChange, theme, onToggleTheme }: NavbarProps) {
   return (
-    <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-md px-8 flex items-center justify-between transition-colors">
+    <header className="h-16 border-b border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/30 backdrop-blur-md px-8 shrink-0 flex items-center justify-between transition-colors">
       <div className="flex items-center space-x-4 w-96">
         <div className="relative w-full">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500" />

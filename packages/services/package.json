@@ -1,10 +1,9 @@
 {
-  "name": "services",
-  "version": "0.0.0",
+  "name": "@taskflow/services",
+  "version": "1.0.0",
   "private": true,
+  "main": "src/index.js",
   "scripts": {
-    "dev": "echo 'Add dev script here'",
-    "build": "echo 'Add build script here'",
     "test": "echo 'Add test script here'",
     "lint": "echo 'Add lint script here'"
   },

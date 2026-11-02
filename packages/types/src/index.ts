@@ -1,4 +1,5 @@
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
 export type TaskStatus = 'todo' | 'in_progress' | 'completed';
 
 export interface Task {
@@ -14,7 +15,9 @@ export interface Task {
   createdAt: string;
   updatedAt?: string;
 }
+
 export type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>;
+
 export type UpdateTaskInput = Partial<CreateTaskInput>;
 
-
+export type QuickFilterType = 'all' | 'due_today' | 'overdue' | 'high_priority';
