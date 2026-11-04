@@ -1,4 +1,5 @@
 export type LayoutVariant = 'standard' | 'command_center' | 'focus' | 'tabbed';
+export type TasksLayoutVariant = 'list' | 'kanban';
 
 export interface AppSettings {
   defaultPriority: 'low' | 'medium' | 'high' | 'urgent';
@@ -6,6 +7,7 @@ export interface AppSettings {
   enableNotifications: boolean;
   compactView: boolean;
   layoutVariant: LayoutVariant;
+  tasksLayoutVariant: TasksLayoutVariant;
 }
 
 const SETTINGS_KEY = 'taskflow_settings';
@@ -16,6 +18,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   enableNotifications: true,
   compactView: false,
   layoutVariant: 'standard', // <--- Default layout
+  tasksLayoutVariant: 'list', // <--- Default task layout
 };
 
 export const settingsService = {

@@ -9,6 +9,8 @@ export interface Task {
   description?: string;
   status: TaskStatus;
   priority: TaskPriority;
+  listOrder?: number;       // Order in the Simple List view
+  kanbanOrder?: number;     // Order within its Kanban column
   category?: string;
   projectId?: string;
   dueDate?: string;

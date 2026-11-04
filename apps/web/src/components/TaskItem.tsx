@@ -4,7 +4,7 @@ import type { Task } from '@taskflow/types';
 
 interface TaskItemProps {
   task: Task;
-  onToggle: (task: Task) => void;
+  onToggleStatus: (task: Task) => void;
   onDelete: (id: string) => void;
 }
 
@@ -15,7 +15,7 @@ const PRIORITY_BADGES: Record<Task['priority'], string> = {
   urgent: 'bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-500/20',
 };
 
-export function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
+export function TaskItem({ task, onToggleStatus, onDelete }: TaskItemProps) {
   const isCompleted = task.status === 'completed';
   const isInProgress = task.status === 'in_progress';
 
@@ -25,7 +25,7 @@ export function TaskItem({ task, onToggle, onDelete }: TaskItemProps) {
     }`}>
       <div className="flex items-start space-x-3.5 flex-1 min-w-0 pr-4">
         <button
-          onClick={() => onToggle(task)}
+          onClick={() => onToggleStatus(task)}
           className="mt-0.5 text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors shrink-0"
         >
           {isCompleted ? (
