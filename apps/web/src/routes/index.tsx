@@ -2,7 +2,7 @@ import React from 'react';
 import { useRoutes, Navigate } from 'react-router-dom';
 import type { RouteObject } from 'react-router-dom';
 import { AppLayout } from '../layouts/AppLayout';
-import { DashboardView } from '../screens/DashboardView';
+import { DashboardView } from '../screens/dashboard';
 import { ProjectsView } from '../screens/ProjectsView';
 import { SettingsView } from '../screens/SettingsView';
 

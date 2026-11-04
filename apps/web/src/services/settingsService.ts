@@ -1,8 +1,11 @@
+export type LayoutVariant = 'standard' | 'command_center' | 'focus' | 'tabbed';
+
 export interface AppSettings {
   defaultPriority: 'low' | 'medium' | 'high' | 'urgent';
   defaultWorkspace: string;
   enableNotifications: boolean;
   compactView: boolean;
+  layoutVariant: LayoutVariant;
 }
 
 const SETTINGS_KEY = 'taskflow_settings';
@@ -12,6 +15,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   defaultWorkspace: 'Work & Career',
   enableNotifications: true,
   compactView: false,
+  layoutVariant: 'standard', // <--- Default layout
 };
 
 export const settingsService = {

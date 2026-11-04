@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Settings, Sliders, Bell, LayoutGrid, ShieldCheck, Check } from 'lucide-react';
-import { settingsService, type AppSettings } from '../services/settingsService';
+import { Settings, Sliders, Bell, LayoutGrid, ShieldCheck, Check, LayoutTemplate } from 'lucide-react';
+import { settingsService, type AppSettings, type LayoutVariant } from '../services/settingsService';
 
 export function SettingsView() {
   const [settings, setSettings] = useState<AppSettings>(() => settingsService.getSettings());
@@ -77,7 +77,7 @@ export function SettingsView() {
           </div>
         </div>
 
-        {/* Interface Preferences */}
+        {/* Interface Preferences & Layout */}
         <div className="bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 p-6 rounded-xl backdrop-blur space-y-4 shadow-sm transition-colors">
           <div className="flex items-center space-x-3 pb-4 border-b border-slate-100 dark:border-slate-800/80">
             <div className="p-2 bg-cyan-50 dark:bg-cyan-600/10 text-cyan-600 dark:text-cyan-400 rounded-lg">
@@ -85,36 +85,55 @@ export function SettingsView() {
             </div>
             <div>
               <h3 className="text-base font-semibold text-slate-900 dark:text-white">Interface & Display</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Customize how your task stream is rendered.</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Customize how your task stream and dashboard are rendered.</p>
             </div>
           </div>
 
           <div className="space-y-4 pt-2">
-            <label className="flex items-center justify-between cursor-pointer">
-              <div>
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-200">Compact Task Cards</span>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Reduce padding on task list rows for higher information density.</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.compactView}
-                onChange={(e) => handleUpdate('compactView', e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-              />
-            </label>
+            {/* Active Layout Variant Select */}
+            <div>
+              <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
+                Default Dashboard Layout
+              </label>
+              <select
+                value={settings.layoutVariant}
+                onChange={(e) => handleUpdate('layoutVariant', e.target.value as LayoutVariant)}
+                className="w-full md:w-1/2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-3 py-2.5 text-sm text-slate-800 dark:text-slate-300 focus:outline-none focus:border-indigo-500 transition"
+              >
+                <option value="standard">Standard Grid</option>
+                <option value="command_center">Command Center (Bento)</option>
+                <option value="focus">Focus Mode (Task First)</option>
+                <option value="tabbed">Tabbed Workspace</option>
+              </select>
+            </div>
 
-            <label className="flex items-center justify-between cursor-pointer pt-2 border-t border-slate-100 dark:border-slate-800/60">
-              <div>
-                <span className="text-sm font-medium text-slate-900 dark:text-slate-200">Desktop Notifications</span>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Get alerted when tasks are due or marked urgent.</p>
-              </div>
-              <input
-                type="checkbox"
-                checked={settings.enableNotifications}
-                onChange={(e) => handleUpdate('enableNotifications', e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-              />
-            </label>
+            <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 space-y-4">
+              <label className="flex items-center justify-between cursor-pointer">
+                <div>
+                  <span className="text-sm font-medium text-slate-900 dark:text-slate-200">Compact Task Cards</span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Reduce padding on task list rows for higher information density.</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.compactView}
+                  onChange={(e) => handleUpdate('compactView', e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+              </label>
+
+              <label className="flex items-center justify-between cursor-pointer pt-2 border-t border-slate-100 dark:border-slate-800/60">
+                <div>
+                  <span className="text-sm font-medium text-slate-900 dark:text-slate-200">Desktop Notifications</span>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Get alerted when tasks are due or marked urgent.</p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.enableNotifications}
+                  onChange={(e) => handleUpdate('enableNotifications', e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                />
+              </label>
+            </div>
           </div>
         </div>
 
